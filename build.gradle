@@ -1,0 +1,32 @@
+plugins {
+    // Apply the Java plugin to add support for Java
+    id 'java'
+    // Optional: Adds support for building a runnable CLI application
+    id 'application' 
+}
+
+repositories {
+    // Use Maven Central for downloading external libraries
+    mavenCentral()
+}
+
+dependencies {
+    // This is where you will add libraries later (e.g., JUnit for testing)
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
+}
+
+java {
+    // Sets the Java version (adjust to 17, 21, etc. depending on your JDK)
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+application {
+    // Define the main class for the application so you can run it easily
+    mainClass = 'com.tictacsudo.Main' 
+}
+
+test {
+    useJUnitPlatform()
+}
