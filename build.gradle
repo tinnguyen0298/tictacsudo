@@ -2,7 +2,10 @@ plugins {
     // Apply the Java plugin to add support for Java
     id 'java'
     // Optional: Adds support for building a runnable CLI application
-    id 'application' 
+    id 'application'
+    id 'org.springframework.boot' version '4.1.0'  // Spring Boot plugin
+    id 'io.spring.dependency-management' version '1.1.6'
+
 }
 
 repositories {
@@ -11,6 +14,8 @@ repositories {
 }
 
 dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter'
+
     // This is where you will add libraries later (e.g., JUnit for testing)
     testImplementation 'org.junit.jupiter:junit-jupiter:5.10.0'
 }

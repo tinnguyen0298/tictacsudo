@@ -1,7 +1,11 @@
 package com.tictacsudo;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
 public class Main {
     public static void main(String[] args) {
-        GameEngine gameEngine = new GameEngine();
-        gameEngine.startGame();
+        SpringApplication.run(Main.class, args);
     }
 }
