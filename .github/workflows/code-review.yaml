@@ -1,0 +1,50 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  code-review:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get Code Diff
+        id: code-diff
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }} --depth=1
+          git diff origin/${{ github.event.pull_request.base.ref }}...HEAD > code_diff.txt
+
+      - name: Run AI Code Review
+        id: gemini-review
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TICTACSUDO_KEY: ${{ secrets.TICTACSUDO_KEY }}
+        run: |
+          DIFF_CONTENT=$(cat code_diff.txt | jq -sRr @json)
+          PROMPT="Act as a Senior Java and Angular mentor. Review these code changes for clean code, edge cases, and architectural traps. Keep your response educational: $DIFF_CONTENT"
+          RESPONSE=$(curl -X POST "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${TICTACSUDO_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"contents\": [{\"parts\": [{\"text\": $(echo $PROMPT | jq -R .)}]}]}")
+          REVIEW_TEXT=$(echo "$RESPONSE" | jq -r '.candidates[0].content.parts[0].text')
+          echo "$REVIEW_TEXT" > review_feedback.md
+
+      - name: Post Comment to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reviewFeedback = fs.readFileSync('review_feedback.md', 'utf8');
+            github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.payload.pull_request.number,
+                body: reviewFeedback
+            });
